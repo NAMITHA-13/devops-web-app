@@ -1,12 +1,13 @@
-name: CI Pipeline
+name: CI Pipeline with Code Quality
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main, feature/code-quality-ci ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build-test-docker:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,15 +17,20 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install pytest
 
-      - name: Run tests
-        run: pytest
+      - name: Run code quality checks (flake8)
+        run: |
+          flake8 .
+
+      - name: Run unit tests
+        run: |
+          pytest
 
       - name: Build Docker image
-        run: docker build -t devops-web-app .
+        run: |
+          docker build -t devops-web-app .
